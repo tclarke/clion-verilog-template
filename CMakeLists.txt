@@ -10,6 +10,6 @@ set(TARGET "model")
 
 include_directories(src)
 
-add_subdirectory(software)
+#add_subdirectory(software)
 add_subdirectory(bench)
 add_subdirectory(synthesis)
