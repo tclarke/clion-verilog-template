@@ -1,0 +1,4 @@
+[submodule "src/osdvu"]
+	path = src/osdvu
+	url = https://github.com/cyrozap/osdvu.git
+	branch = master
