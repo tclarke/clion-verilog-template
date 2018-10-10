@@ -22,9 +22,12 @@ module top (
 	wire is_receiving;
 	wire is_transmitting;
 	wire recv_error;
+	wire wen;
+	wire [8:0] rcnt;
 
 	assign D5 = recv_error;
 	assign {D4, D3, D2, D1} = rx_byte[7:4];
+	assign wen = 1'b0;
 
 	uart #(
 	    .CLOCK_DIVIDE(312)                // clk frequency / (4 * baud rate) -- 12MHz / (9600 * 4)
@@ -43,13 +46,19 @@ module top (
 		.recv_error(recv_error)           // Indicates error in receiving packet.
 	);
 
+	buf_ram data(
+	    .clk(CLK),
+	    .wen(wen),
+	    .addr(rcnt),
+	    .rdata(tx_byte)
+    );
+
+    always @(negedge CLK) begin
+        rcnt <= rcnt + 1;
+    end
+
 	always @(posedge CLK) begin
-		if (received) begin
-			tx_byte <= rx_byte;
-			transmit <= 1;
-		end else begin
-			transmit <= 0;
-		end
+	    transmit <= 1;
 	end
 endmodule
 
