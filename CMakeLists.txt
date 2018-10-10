@@ -6,10 +6,6 @@ set(USING_ALTERA 0 CACHE STRING "Altera Option")
 set(USING_LATTICE 1 CACHE STRING "Lattice Option")
 
 set(BLOCK_RAM_SIZE 8 512)
-set(BLOCK_RAM_FILES
-    ${CMAKE_SOURCE_DIR}/synthesis/foo.hex
-    ${CMAKE_SOURCE_DIR}/synthesis/foo2.hex
-        )
 
 include(cmake/hdl.cmake)
 set(TARGET "model")

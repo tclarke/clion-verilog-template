@@ -6,8 +6,7 @@
 #    add_simulation_target(${target} ${bench} ${src_files})
 #endforeach(bench)
 
-add_simulation_target(buf_ram_tb ${CMAKE_CURRENT_SOURCE_DIR}/buf_ram_tb.v
-                                 ${CMAKE_CURRENT_SOURCE_DIR}/../src/buf_ram.v)
-
-#add_dependencies(attiny_tb_simulation software)
-#add_dependencies(fetch_tb_simulation software)
+add_simulation_target(buf_ram_tb
+        BLOCKRAMFILES ${CMAKE_CURRENT_SOURCE_DIR}/buf_ram_tb.hex
+        SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/buf_ram_tb.v
+                ${CMAKE_CURRENT_SOURCE_DIR}/../src/buf_ram.v)

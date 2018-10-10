@@ -55,9 +55,7 @@ end
 initial
 begin
     addr <= 9'h0;
-    #1 $readmemh("../bram.hex", DUT.mem);
-//    repeat(10) #16 ;
-//    $finish;
+    #1 $readmemh("bram.hex", DUT.mem);
 end
 
 endmodule
