@@ -8,10 +8,9 @@ module top (
         input CLK,
         input TX,
         input RX,
+        input RTS,
         output D1,
         output D2,
-        output D3,
-        output D4,
         output D5
 );
 	wire reset = 0;
@@ -25,8 +24,9 @@ module top (
 	wire wen;
 	wire [8:0] rcnt;
 
+	reg [1+22-1:0] counter = 0;
+
 	assign D5 = recv_error;
-	assign {D4, D3, D2, D1} = rx_byte[7:4];
 	assign wen = 1'b0;
 
 	uart #(
@@ -53,12 +53,18 @@ module top (
 	    .rdata(tx_byte)
     );
 
-    always @(negedge CLK) begin
-        rcnt <= rcnt + 1;
+    always @(posedge CLK) begin
+        counter <= counter + 1;
     end
 
-	always @(posedge CLK) begin
-	    transmit <= 1;
-	end
+    assign D1 = counter[22];
+    assign transmit = ~RTS;
+    assign D2 = ~RTS;
+
+    always @(negedge CLK) begin
+        if (transmit == 1) begin
+            rcnt <= rcnt + 1;
+        end
+    end
 endmodule
 
