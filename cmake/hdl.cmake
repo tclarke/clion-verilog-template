@@ -37,7 +37,7 @@ function(add_synthesis_target target)
 
     get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif
-            COMMAND yosys -q -p \"read_verilog -DICE40_SYNTHESIS=1 -I${dirs} ${SYNTHESIS_SOURCES}\; synth_ice40 -blif ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif\"
+            COMMAND yosys -q -p \"read_verilog -DICE40_SYNTHESIS=1 -I${dirs} ${SYNTHESIS_SOURCES}\; synth_ice40 -abc2 -blif ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif\"
             DEPENDS bram_init.hex ${SYNTHESIS_SOURCES})
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
             COMMAND arachne-pnr -d 1k -P tq144 -p ${SYNTHESIS_PCF} ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif -o ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
