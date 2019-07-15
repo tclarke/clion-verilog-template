@@ -1,8 +1,8 @@
 if (DEFINED BLOCK_RAM_SIZE)
     add_custom_target(bram_init.hex icebram -g ${BLOCK_RAM_SIZE} > ${CMAKE_BINARY_DIR}/bram_init.hex
             BYPRODUCTS ${CMAKE_BINARY_DIR}/bram_init.hex)
-else(DEFINED BLOCK_RAM_SIZE)
-    add_custom_command(bram_init.hex touch ${CMAKE_BINARY_DIR}/bram_init.hex
+else (DEFINED BLOCK_RAM_SIZE)
+    add_custom_target(bram_init.hex touch ${CMAKE_BINARY_DIR}/bram_init.hex
             BYPRODUCTS ${CMAKE_BINARY_DIR}/bram_init.hex)
 endif (DEFINED BLOCK_RAM_SIZE)
 
@@ -18,16 +18,16 @@ function(add_simulation_target target)
             COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/bram.hex)
     endif(DEFINED SIMULATION_BLOCKRAMFILES)
 
-    get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim
-            COMMAND iverilog -DSIMULATION=1 -I ${dirs} -o ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim ${SIMULATION_SOURCES}
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bram.hex bram_init.hex ${SIMULATION_SOURCES})
-    add_custom_target(${target}
-            COMMAND vvp ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim -lxt2
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim)
-    add_custom_target(${target}_wave
-            COMMAND open -a gtkwave ${CMAKE_CURRENT_BINARY_DIR}/${target}.lxt
-            DEPENDS ${target})
+    #get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+    #add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim
+    #        COMMAND iverilog -DSIMULATION=1 -g2012 -I ${dirs} -o ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim ${SIMULATION_SOURCES}
+    #        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bram.hex bram_init.hex ${SIMULATION_SOURCES})
+    #add_custom_target(${target}
+    #        COMMAND vvp ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim -lxt2
+    #        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target}.sim)
+    #add_custom_target(${target}_wave
+    #        COMMAND open -a gtkwave ${CMAKE_CURRENT_BINARY_DIR}/${target}.lxt
+    #        DEPENDS ${target})
 endfunction(add_simulation_target)
 
 function(add_synthesis_target target)
@@ -36,13 +36,13 @@ function(add_synthesis_target target)
     cmake_parse_arguments(SYNTHESIS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif
-            COMMAND yosys -q -p \"read_verilog -DICE40_SYNTHESIS=1 -I${dirs} ${SYNTHESIS_SOURCES}\; synth_ice40 -abc2 -blif ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif\"
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.json
+            COMMAND yosys -q -p \"read_verilog -DICE40_SYNTHESIS=1 -I${dirs} ${SYNTHESIS_SOURCES}\; synth_ice40 -json ${CMAKE_CURRENT_BINARY_DIR}/${target}.json\"
             DEPENDS bram_init.hex ${SYNTHESIS_SOURCES})
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
-            COMMAND arachne-pnr -d 1k -P tq144 -p ${SYNTHESIS_PCF} ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif -o ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
+            COMMAND nextpnr-ice40 --hx1k --package tq144 --json ${CMAKE_CURRENT_BINARY_DIR}/${target}.json --pcf ${SYNTHESIS_PCF} --asc ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
             COMMAND icetime -d hx1k -P tq144 ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
-            DEPENDS ${SYNTHESIS_PCF} ${CMAKE_CURRENT_BINARY_DIR}/${target}.blif)
+            DEPENDS ${SYNTHESIS_PCF} ${CMAKE_CURRENT_BINARY_DIR}/${target}.json)
 
     if (DEFINED BLOCK_RAM_FILES)
         add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bram.hex
