@@ -6,6 +6,14 @@ else (DEFINED BLOCK_RAM_SIZE)
             BYPRODUCTS ${CMAKE_BINARY_DIR}/bram_init.hex)
 endif (DEFINED BLOCK_RAM_SIZE)
 
+if (NOT DEFINED ICE40_DEVICE)
+    message(FATAL_ERROR "Must define ICE40_DEVICE!")
+endif (NOT DEFINED ICE40_DEVICE)
+
+if (NOT DEFINED ICE40_PACKAGE)
+    message(FATAL_ERROR "Must define ICE40_PACKAGE!")
+endif (NOT DEFINED ICE40_PACKAGE)
+
 function(add_simulation_target target)
     set(multiValueArgs BLOCKRAMFILES SOURCES)
     cmake_parse_arguments(SIMULATION "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -40,8 +48,8 @@ function(add_synthesis_target target)
             COMMAND yosys -q -p \"read_verilog -DICE40_SYNTHESIS=1 -I${dirs} ${SYNTHESIS_SOURCES}\; synth_ice40 -json ${CMAKE_CURRENT_BINARY_DIR}/${target}.json\"
             DEPENDS bram_init.hex ${SYNTHESIS_SOURCES})
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
-            COMMAND nextpnr-ice40 --hx1k --package tq144 --json ${CMAKE_CURRENT_BINARY_DIR}/${target}.json --pcf ${SYNTHESIS_PCF} --asc ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
-            COMMAND icetime -d hx1k -P tq144 ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
+            COMMAND nextpnr-ice40 --${ICE40_DEVICE} --package ${ICE40_PACKAGE} --json ${CMAKE_CURRENT_BINARY_DIR}/${target}.json --pcf ${SYNTHESIS_PCF} --asc ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
+            COMMAND icetime -d ${ICE40_DEVICE} -P ${ICE40_PACKAGE} ${CMAKE_CURRENT_BINARY_DIR}/${target}.asc
             DEPENDS ${SYNTHESIS_PCF} ${CMAKE_CURRENT_BINARY_DIR}/${target}.json)
 
     if (DEFINED BLOCK_RAM_FILES)
@@ -65,4 +73,3 @@ function(add_synthesis_target target)
             COMMAND iceprog ${CMAKE_CURRENT_BINARY_DIR}/${target}.bin
             DEPENDS ${target})
 endfunction(add_synthesis_target)
-
